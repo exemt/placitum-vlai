@@ -1,0 +1,8 @@
+model    = https://huggingface.co/CIRCL/vulnerability-severity-classification-russian-ruRoberta-large
+revision = 5de95b34808c905f912eb6fd11fdbd64717c57e3
+date     = 2026-04-07
+license  = CC-BY-4.0
+dataset  = https://huggingface.co/datasets/CIRCL/Vulnerability-FSTEC
+base     = https://huggingface.co/ai-forever/ruRoberta-large
+paper    = https://arxiv.org/abs/2507.03607
+served   = https://github.com/vulnerability-lookup/ML-Gateway

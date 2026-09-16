@@ -1,0 +1,8 @@
+# torch is installed by the Dockerfiles: the CPU and CUDA images take it from different indexes.
+transformers==5.16.1
+tokenizers==0.23.2
+huggingface_hub==1.30.0
+safetensors==0.8.0
+numpy==2.5.3
+nats-py==2.15.0
+PyYAML==6.0.3

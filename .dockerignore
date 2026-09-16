@@ -1,0 +1,17 @@
+**/.git
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+README.md
+README.ru.md
+INSTALL.md
+INSTALL.ru.md
+LICENSE.md
+LICENSE.ru.md
+SOURCE
+.github/
+.gitignore
+.gitattributes

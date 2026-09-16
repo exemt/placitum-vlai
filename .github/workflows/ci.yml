@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [master, rc_1.0, develop]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: compile
+        run: python -m compileall -q src
+
+      - name: build CPU image
+        run: docker build -f deploy/Dockerfile -t placitum/vlai:ci .

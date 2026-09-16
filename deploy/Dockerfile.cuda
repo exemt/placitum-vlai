@@ -1,0 +1,58 @@
+FROM nvidia/cuda:12.8.1-base-ubuntu24.04
+
+ARG VERSION=dev
+ARG REVISION=unknown
+
+LABEL org.opencontainers.image.title="placitum/vlai" \
+      org.opencontainers.image.description="Placitum vlai inspector: severity of a vulnerability description, CUDA build" \
+      org.opencontainers.image.source="https://github.com/exemt/placitum-vlai" \
+      org.opencontainers.image.licenses="LicenseRef-Placitum" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${REVISION}"
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app/src \
+    VLAI_DEVICE=cuda \
+    HOME=/var/lib/waf/vlai \
+    HF_HOME=/var/lib/waf/vlai/hf \
+    HF_HUB_DISABLE_TELEMETRY=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    NATS_URL=nats://nats:4222 \
+    WAF_VLAI_SUBJECT=waf.req.vlai \
+    WAF_VLAI_NAME=vlai
+
+WORKDIR /app
+
+COPY deploy/entrypoint.sh /usr/local/bin/vlai-entry
+COPY requirements.txt ./
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-pip python3-venv ca-certificates \
+ && ln -sf /usr/bin/python3 /usr/local/bin/python \
+ && rm -rf /var/lib/apt/lists/* \
+ && python3 -m pip install --break-system-packages --no-cache-dir --upgrade --ignore-installed pip \
+ && python3 -m pip install --break-system-packages --no-cache-dir \
+        --index-url https://download.pytorch.org/whl/cu128 \
+        --extra-index-url https://pypi.org/simple \
+        torch==2.14.0 \
+ && python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt \
+ && chmod +x /usr/local/bin/vlai-entry \
+ && useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin vlai \
+ && mkdir -p /var/lib/waf/vlai \
+ && chown -R vlai:vlai /var/lib/waf/vlai
+
+COPY src ./src
+COPY inspector.conf ./inspector.conf
+
+USER vlai
+
+VOLUME ["/var/lib/waf/vlai"]
+
+HEALTHCHECK --interval=15s --timeout=8s --start-period=120s --retries=3 \
+    CMD ["python", "/app/src/probe.py", "--quiet", "--timeout", "5000", "--deadline", "200", \
+         "--body", "{\"description\":\"vlai readiness check\"}", "--expect", "score"]
+
+ENTRYPOINT ["vlai-entry"]
+CMD ["inspect"]

@@ -33,7 +33,7 @@ takes hundreds of milliseconds, so for a 15–25 ms wave only a GPU and a short 
 
 The text is taken from the first place that has it: the `description`, `text`, `advisory`, `details`
 or `описание` field of a JSON body, the raw body, the same fields of the query string. The body and
-the query string are read from the exchange by locator. The text is cut at 3072 characters, and the
+the query string are read from the buffer by locator. The text is cut at 3072 characters, and the
 model window is 512 tokens.
 
 The model returns a class and its confidence. The score is `100 × weight × confidence`, with weights
@@ -47,7 +47,7 @@ full confidence gives 25.
 | `allow` | `VLAI_SKIPPED` | a neighbour's `skip` request switched the check off |
 | `allow` | `VLAI_PROFILE_OFF` | the profile is off |
 | `allow` | `VLAI_OBSERVE` | the profile observes; the verdict it would give is in the audit |
-| `error` | `VLAI_STORE_UNAVAILABLE` | the exchange did not return the body or the query string |
+| `error` | `VLAI_STORE_UNAVAILABLE` | the buffer did not return the body or the query string |
 | `error` | `VLAI_UNKNOWN_PROFILE` | the route names a profile that is not in the generation |
 | `error` | `VLAI_DEADLINE` | less budget left than `VLAI_MIN_BUDGET_MS` |
 | `error` | `VLAI_QUEUE_LIMIT` | the local queue is full |
@@ -96,7 +96,7 @@ outcomes:
     ttl: 10m
 ```
 
-**Mode.** `observe` does all the same work (exchange, inference, neighbour factors) but gives the
+**Mode.** `observe` does all the same work (buffer, inference, neighbour factors) but gives the
 module `allow` with `VLAI_OBSERVE` and leaves the decision in the audit: `engine.passive: true`,
 `would_verdict`, `would_code`, `would_score`. Requests and list writes still go out, because
 observing mutes only the verdict. `off` answers `allow` with `VLAI_PROFILE_OFF` and runs no
@@ -104,7 +104,7 @@ inference.
 
 **Neighbour requests** (`trigger.prior`). Two verbs of the action channel apply here. `threshold`
 scales the score that goes to the module by `1 + delta/100` (the sum is kept within −100..900; the
-route thresholds do not move). `skip` switches the check off before the exchange and the inference
+route thresholds do not move). `skip` switches the check off before the buffer and the inference
 and answers `allow` with `VLAI_SKIPPED`; for the most expensive inspector this saves the most. The
 outcome of each request and the `score_raw`, `score_scale_percent` and `score_scaled` values go to
 the audit event.
@@ -112,7 +112,7 @@ the audit event.
 **Outcome rows** (`outcomes`). `on: score` compares `at` with the score that goes to the module,
 after neighbour factors. `on: overload` fires when the queue is at least `at` percent full as the
 request joins it, and on a request dropped because the queue is full; the requests then travel in
-that `error` answer. Each row does one thing: `to` with `do` asks a neighbour, `list` with `ttl`
+that `error` answer. Each row does one thing: `to` with `do` signals a neighbour, `list` with `ttl`
 writes the client into a live set. `write` says what to write: the address (`addr`, the default),
 its effective announcement (`net`), every announcement over it (`net_all`) or the whole autonomous
 system (`asn`). Announcements come from the geo coder over HTTP (`WAF_VLAI_GEO_URL`) within the

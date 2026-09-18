@@ -11,7 +11,7 @@ rating; it is an optional component.
 | Component | Required | Why |
 | --- | --- | --- |
 | NATS | yes | the `waf.req.vlai` queue, audit, log, profile generations |
-| Exchange Redis | yes | the request body travels in the exchange, not in the message: without it every such request gets `error` |
+| Buffer Redis | yes | the request body travels in the buffer, not in the message: without it every such request gets `error` |
 | Hugging Face access | on the first start | downloading the weights, about 1.4 GB |
 | `keeper` | for list writes | receives `waf.sets.<set>.event` |
 | `geo` | for `net`, `net_all` and `asn` writes | over HTTP; without it such writes answer `error` |
@@ -41,7 +41,7 @@ Copy the contents of `./hub` to `/var/lib/waf/vlai/hf/hub` in the volume and set
 | --- | --- | --- |
 | `NATS_URL` | `nats://127.0.0.1:4222` | bus; several addresses are comma-separated |
 | `NATS_USER`, `NATS_PASS`, `NATS_TOKEN` | empty | bus authentication |
-| `REDIS_URL` | from `inspector.conf` | exchange: body and query string by locator; the health check probe reads only this variable |
+| `REDIS_URL` | from `inspector.conf` | buffer: body and query string by locator; the health check probe reads only this variable |
 | `WAF_VLAI_SUBJECT` | `waf.req.vlai` | subscription |
 | `WAF_VLAI_NAME` | `vlai` | name in the inspector registry |
 | `WAF_VLAI_QUEUE` | the name | queue group on the bus |
@@ -92,13 +92,13 @@ docker exec <container> python /app/src/probe.py --redis redis://redis:6379 \
   --body '{"description":"Удалённый злоумышленник может выполнить произвольный код."}'
 ```
 
-Expect `verdict: score` with `VLAI_SCORE`. Without `--redis` the probe puts nothing into the exchange
+Expect `verdict: score` with `VLAI_SCORE`. Without `--redis` the probe puts nothing into the buffer
 and gets `allow` with `VLAI_NO_TEXT`: a meaningful answer, but not a model check.
 
 ## Pitfalls
 
 - **Without `REDIS_URL` the container stays `unhealthy` while the inspector works.** The probe puts
-  the body into the exchange and takes the address only from the environment; it does not read the
+  the body into the buffer and takes the address only from the environment; it does not read the
   `redis` block of `inspector.conf`.
 - **The first start is long.** While the weights download there is no subscription and the container
   is not `healthy`; that is not a failure.

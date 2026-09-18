@@ -51,7 +51,7 @@ full confidence gives 25.
 | `error` | `VLAI_UNKNOWN_PROFILE` | the route names a profile that is not in the generation |
 | `error` | `VLAI_DEADLINE` | less budget left than `VLAI_MIN_BUDGET_MS` |
 | `error` | `VLAI_QUEUE_LIMIT` | the local queue is full |
-| `error` | `VLAI_GEO_UNAVAILABLE` | a `net`, `net_all` or `asn` write needs the geo coder, and it does not answer |
+| `error` | `VLAI_GEO_UNAVAILABLE` | a `net`, `net_all` or `asn` write needs the network directory, and it does not answer |
 | `error` | `VLAI_UNPARSEABLE`, `VLAI_UNSUPPORTED_VERSION`, `VLAI_PHASE_NOT_SUPPORTED`, `VLAI_INTERNAL_ERROR` | a broken message, an unknown schema version, a WebSocket frame, an internal failure |
 
 After `error` the route decides with `waf_exception <phase> inspector pass|deny`. The audit event
@@ -115,7 +115,7 @@ request joins it, and on a request dropped because the queue is full; the reques
 that `error` answer. Each row does one thing: `to` with `do` signals a neighbour, `list` with `ttl`
 writes the client into a live set. `write` says what to write: the address (`addr`, the default),
 its effective announcement (`net`), every announcement over it (`net_all`) or the whole autonomous
-system (`asn`). Announcements come from the geo coder over HTTP (`WAF_VLAI_GEO_URL`) within the
+system (`asn`). Announcements come from the network directory over HTTP (`WAF_VLAI_GEO_URL`) within the
 message budget. The write goes to keeper as `waf.sets.<set>.event` after the answer.
 
 ## Trying the model without the bus

@@ -54,8 +54,8 @@ hf download CIRCL/vulnerability-severity-classification-russian-ruRoberta-large 
 | `WAF_VLAI_CONF` | `inspector.conf` в рабочем каталоге, затем `/app/inspector.conf` | очередь и адрес Redis |
 | `WAF_VLAI_QUEUE_DEPTH`, `WAF_VLAI_QUEUE_FULL`, `WAF_VLAI_QUEUE_EXPAND` | `256`, `drop`, `off` | очередь и поведение при переполнении; то же через `inspector.conf` |
 | `WAF_VLAI_PRIOR` | пусто | отправители, чьи сигналы `threshold` принимает встроенный профиль, через запятую (`ip,action`); `*` не принимается |
-| `WAF_VLAI_GEO_URL` | пусто | HTTP-адрес кодера гео для записей `net`, `net_all` и `asn` |
-| `WAF_VLAI_GEO_TIMEOUT` | `500` | таймаут кодера в бюджете сообщения: миллисекунды числом либо `500ms`, `0.5s` |
+| `WAF_VLAI_GEO_URL` | пусто | HTTP-адрес справочника сетей для записей `net`, `net_all` и `asn` |
+| `WAF_VLAI_GEO_TIMEOUT` | `500` | таймаут справочника сетей в бюджете сообщения: миллисекунды числом либо `500ms`, `0.5s` |
 | `WAF_HEARTBEAT_EVERY` | `4s` | период кадра присутствия |
 | `WAF_LOG_SHIP`, `WAF_LOG_WRITER` | `on`, имя машины | уходит ли журнал процесса на шину и под каким именем |
 

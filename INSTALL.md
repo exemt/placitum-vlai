@@ -54,8 +54,8 @@ Copy the contents of `./hub` to `/var/lib/waf/vlai/hf/hub` in the volume and set
 | `WAF_VLAI_CONF` | `inspector.conf` in the working directory, then `/app/inspector.conf` | queue and Redis settings |
 | `WAF_VLAI_QUEUE_DEPTH`, `WAF_VLAI_QUEUE_FULL`, `WAF_VLAI_QUEUE_EXPAND` | `256`, `drop`, `off` | queue and overflow behaviour; the same through `inspector.conf` |
 | `WAF_VLAI_PRIOR` | empty | senders whose `threshold` requests the built-in profile accepts, comma-separated (`ip,action`); `*` is rejected |
-| `WAF_VLAI_GEO_URL` | empty | geo coder HTTP address for `net`, `net_all` and `asn` writes |
-| `WAF_VLAI_GEO_TIMEOUT` | `500` | coder timeout within the message budget: milliseconds, or `500ms`, `0.5s` |
+| `WAF_VLAI_GEO_URL` | empty | network directory HTTP address for `net`, `net_all` and `asn` writes |
+| `WAF_VLAI_GEO_TIMEOUT` | `500` | network directory timeout within the message budget: milliseconds, or `500ms`, `0.5s` |
 | `WAF_HEARTBEAT_EVERY` | `4s` | presence frame interval |
 | `WAF_LOG_SHIP`, `WAF_LOG_WRITER` | `on`, host name | whether the process log goes to the bus, and under which name |
 

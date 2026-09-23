@@ -4,10 +4,9 @@ English · [Русский](README.ru.md)
 
 Placitum inspector in Python. It rates the severity of a vulnerability from its Russian description.
 
-It is neither a detector nor a vulnerability scanner. The input is an advisory-style description that
-somebody has already written (FSTEC, BDU), the output is a `score` from 0 to 100. The model does not
-look at code and does not search for SQL injection: it reads text only. The module decides by the
-route threshold; the inspector itself never answers `deny`.
+The input is an advisory-style description that somebody has already written (FSTEC, BDU), the
+output is a `score` from 0 to 100. The model reads that text only. The module decides by the route
+threshold; the inspector answers `score`, `allow` or `error`.
 
 ```
 module ──► waf.req.vlai ──► vlai ──► score | allow | error
@@ -21,7 +20,7 @@ module ──► waf.req.vlai ──► vlai ──► score | allow | error
 [CIRCL/vulnerability-severity-classification-russian-ruRoberta-large](https://huggingface.co/CIRCL/vulnerability-severity-classification-russian-ruRoberta-large),
 licensed CC-BY-4.0. Origin, dataset and paper are listed in [SOURCE](SOURCE).
 
-**The weights are not in the image.** The process downloads them from Hugging Face on the first
+The weights are not in the image. The process downloads them from Hugging Face on the first
 start, about 1.4 GB, and keeps them in the `/var/lib/waf/vlai` volume. The revision is pinned in
 `src/classify.py` and matches `SOURCE`: an installation today and one in a month get the same
 weights, and a replaced head of the model repository never reaches you silently.
@@ -96,20 +95,26 @@ outcomes:
     ttl: 10m
 ```
 
-**Mode.** `observe` does all the same work (buffer, inference, neighbour factors) but gives the
+### Mode
+
+`observe` does all the same work (buffer, inference, neighbour factors) but gives the
 module `allow` with `VLAI_OBSERVE` and leaves the decision in the audit: `engine.passive: true`,
 `would_verdict`, `would_code`, `would_score`. Requests and list writes still go out, because
 observing mutes only the verdict. `off` answers `allow` with `VLAI_PROFILE_OFF` and runs no
 inference.
 
-**Neighbour requests** (`trigger.prior`). Two verbs of the action channel apply here. `threshold`
+### Neighbour requests
+
+Two verbs of the action channel apply through `trigger.prior`. `threshold`
 scales the score that goes to the module by `1 + delta/100` (the sum is kept within −100..900; the
 route thresholds do not move). `skip` switches the check off before the buffer and the inference
 and answers `allow` with `VLAI_SKIPPED`; for the most expensive inspector this saves the most. The
 outcome of each request and the `score_raw`, `score_scale_percent` and `score_scaled` values go to
 the audit event.
 
-**Outcome rows** (`outcomes`). `on: score` compares `at` with the score that goes to the module,
+### Outcome rows
+
+`on: score` compares `at` with the score that goes to the module,
 after neighbour factors. `on: overload` fires when the queue is at least `at` percent full as the
 request joins it, and on a request dropped because the queue is full; the requests then travel in
 that `error` answer. Each row does one thing: `to` with `do` signals a neighbour, `list` with `ttl`
